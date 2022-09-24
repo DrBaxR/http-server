@@ -14,5 +14,7 @@ fn main() -> std::io::Result<()> {
 }
 
 fn handle_connection(stream: TcpStream) {
-    http::read_req(stream);
+    let req_data = http::read_req(stream);
+
+    println!("{req_data:?}")
 }
