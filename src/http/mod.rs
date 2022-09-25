@@ -4,7 +4,11 @@ use std::{
     net::TcpStream,
 };
 
-use self::models::{RequestData, RequestType, RequestBody};
+use json::JsonValue;
+
+use crate::http::models::Request;
+
+use self::models::{RequestBody, RequestData, RequestType};
 
 pub mod models;
 
@@ -61,7 +65,7 @@ fn read_body_bytes(
     }
 }
 
-pub fn parse_req(req_data: &RequestData) {
+pub fn parse_req(req_data: &RequestData) -> Request {
     let (req_data, headers_data, body_data) = match req_data {
         RequestData::WithoutBody(req, headers) => (req, headers, None),
         RequestData::WithBody(req, headers, body) => (req, headers, Some(body)),
@@ -78,11 +82,10 @@ pub fn parse_req(req_data: &RequestData) {
             body_bytes,
         );
 
-        println!("{body:?}")
+        return Request::new(req, headers, Some(body));
     }
 
-    println!("{req:?}");
-    println!("{headers:?}");
+    Request::new(req, headers, None)
 }
 
 fn parse_req_type(req_data: &String) -> RequestType {
@@ -129,10 +132,17 @@ fn parse_headers(headers_data: &Vec<String>) -> HashMap<String, String> {
 fn parse_body(content_type: &str, body_data: &Vec<u8>) -> RequestBody {
     match content_type {
         "text/plain" => RequestBody::TextPlain(parse_text_plain(body_data)),
-        _ => RequestBody::Unknown
+        "application/json" => RequestBody::ApplicationJson(parse_application_json(body_data)),
+        _ => RequestBody::Unknown(body_data.to_owned()),
     }
 }
 
 fn parse_text_plain(data: &Vec<u8>) -> String {
     String::from_utf8(data.to_owned()).unwrap()
+}
+
+fn parse_application_json(data: &Vec<u8>) -> JsonValue {
+    let text = String::from_utf8(data.to_owned()).unwrap();
+
+    json::parse(&text).unwrap()
 }

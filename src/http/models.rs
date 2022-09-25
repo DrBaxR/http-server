@@ -1,4 +1,6 @@
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
+
+use json::JsonValue;
 
 pub enum RequestData {
     WithoutBody(String, Vec<String>),
@@ -20,6 +22,32 @@ impl Debug for RequestData {
                 .field(arg2)
                 .finish(),
         }
+    }
+}
+
+pub struct Request {
+    typ: RequestType,
+    headers: HashMap<String, String>,
+    body: Option<RequestBody>,
+}
+
+impl Request {
+    pub fn new(
+        typ: RequestType,
+        headers: HashMap<String, String>,
+        body: Option<RequestBody>,
+    ) -> Request {
+        Request { typ, headers, body }
+    }
+}
+
+impl Debug for Request {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Request")
+            .field("typ", &self.typ)
+            .field("headers", &self.headers)
+            .field("body", &self.body)
+            .finish()
     }
 }
 
@@ -47,14 +75,16 @@ impl Debug for RequestType {
 
 pub enum RequestBody {
     TextPlain(String),
-    Unknown,
+    ApplicationJson(JsonValue),
+    Unknown(Vec<u8>),
 }
 
 impl Debug for RequestBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::TextPlain(arg0) => f.debug_tuple("TextPlain").field(arg0).finish(),
-            Self::Unknown => write!(f, "Unknown"),
+            Self::ApplicationJson(arg0) => f.debug_tuple("ApplicationJson").field(arg0).finish(),
+            Self::Unknown(arg0) => f.debug_tuple("Unknown").field(arg0).finish(),
         }
     }
 }

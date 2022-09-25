@@ -1,4 +1,4 @@
-use std::{net::{TcpListener, TcpStream}};
+use std::net::{TcpListener, TcpStream};
 
 use web_server::http;
 
@@ -16,4 +16,6 @@ fn main() -> std::io::Result<()> {
 fn handle_connection(stream: TcpStream) {
     let req_data = http::read_req(stream);
     let req = http::parse_req(&req_data);
+
+    println!("{req:?}")
 }
