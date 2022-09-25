@@ -3,7 +3,9 @@ use std::{
     net::TcpStream,
 };
 
-use super::models::RequestData;
+use self::data::RequestData;
+
+pub mod data;
 
 pub fn read_req(stream: TcpStream) -> RequestData {
     let mut reader = BufReader::new(&stream);

@@ -1,6 +1,6 @@
 use std::net::{TcpListener, TcpStream};
 
-use web_server::http;
+use web_server::http::{self, request::Request};
 
 fn main() -> std::io::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:2020")?;
@@ -14,8 +14,8 @@ fn main() -> std::io::Result<()> {
 }
 
 fn handle_connection(stream: TcpStream) {
-    let req_data = http::reader::read_req(stream);
-    let req = http::parser::parse_req(&req_data);
+    let req_data = http::request::reader::read_req(stream);
+    let req = Request::from(req_data);
 
     println!("{req:?}")
 }
