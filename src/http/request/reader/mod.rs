@@ -7,8 +7,8 @@ use self::data::RequestData;
 
 pub mod data;
 
-pub fn read_req(stream: TcpStream) -> RequestData {
-    let mut reader = BufReader::new(&stream);
+pub fn read_req(stream: &TcpStream) -> RequestData {
+    let mut reader = BufReader::new(stream);
 
     let request_line = read_request_line(&mut reader);
     let header_lines = read_header_lines(&mut reader);
