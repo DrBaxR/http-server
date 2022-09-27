@@ -3,9 +3,10 @@ use std::{
     net::TcpStream,
 };
 
-use self::data::RequestData;
-
-pub mod data;
+pub enum RequestData {
+    WithoutBody(String, Vec<String>),
+    WithBody(String, Vec<String>, Vec<u8>),
+}
 
 pub fn read_req(stream: &TcpStream) -> RequestData {
     let mut reader = BufReader::new(stream);

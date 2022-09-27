@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug};
+use std::fmt::Debug;
 
 use json::JsonValue;
 
@@ -55,9 +55,7 @@ pub enum RequestBody {
 impl RequestBody {
     pub fn from(content_type: &str, body_data: &Vec<u8>) -> RequestBody {
         match content_type {
-            "text/plain" => {
-                RequestBody::TextPlain(RequestBody::parse_text_plain(body_data))
-            },
+            "text/plain" => RequestBody::TextPlain(RequestBody::parse_text_plain(body_data)),
             "application/json" => {
                 RequestBody::ApplicationJson(RequestBody::parse_application_json(body_data))
             }
@@ -74,27 +72,4 @@ impl RequestBody {
 
         json::parse(&text).unwrap()
     }
-}
-
-pub fn parse_headers(headers_data: &Vec<String>) -> HashMap<String, String> {
-    let mut headers_map = HashMap::new();
-    headers_data
-        .iter()
-        .map(|line| {
-            let split: Vec<_> = line
-                .split(":")
-                .into_iter()
-                .map(|s| s.trim().to_lowercase())
-                .collect();
-
-            (
-                split.get(0).unwrap().to_owned(),
-                split.get(1).unwrap().to_owned(),
-            )
-        })
-        .for_each(|(key, value)| {
-            headers_map.insert(key, value);
-        });
-
-    headers_map
 }

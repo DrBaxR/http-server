@@ -1,6 +1,6 @@
 use std::{collections::HashMap};
 
-use self::{reader::data::RequestData, parser::components::{RequestMethod, RequestBody}};
+use self::{reader::RequestData, parser::components::{RequestMethod, RequestBody}};
 
 pub mod parser;
 pub mod reader;
