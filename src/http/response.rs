@@ -1,8 +1,18 @@
 use std::collections::HashMap;
 
-use self::status::ResponseStatus;
+pub enum ResponseStatus {
+  Ok,
+  NotFound,
+}
 
-pub mod status;
+impl ResponseStatus {
+  pub fn to_string(&self) -> String {
+    match self {
+        Self::Ok => String::from("200 OK"),
+        Self::NotFound => String::from("404 Not Found"),
+    }
+  }
+}
 
 pub struct Response {
     status: ResponseStatus,
@@ -28,7 +38,7 @@ impl Response {
         }
     }
 
-    pub fn serialize(&mut self) -> Vec<u8> {
+    fn serialize(&mut self) -> Vec<u8> {
         let headers = self
             .headers
             .iter()
@@ -46,5 +56,16 @@ impl Response {
         }
 
         res_bytes
+    }
+
+    pub fn build_data(status: ResponseStatus, headers: &[(&str, &str)], body: Option<Vec<u8>>) -> Vec<u8> {
+        let mut headers_map = HashMap::new();
+        for (key, value) in headers {
+            headers_map.insert(key.to_string(), value.to_string());
+        }
+
+        let mut res = Response::new(status, headers_map, body);
+
+        res.serialize()
     }
 }

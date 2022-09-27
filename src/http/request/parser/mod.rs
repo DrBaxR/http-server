@@ -1,6 +1,6 @@
 use self::components::RequestBody;
 
-use super::{RequestData, Request, RequestType};
+use super::{RequestData, Request, RequestMethod};
 
 pub mod components;
 
@@ -10,7 +10,7 @@ pub fn parse_req(req_data: &RequestData) -> Request {
         RequestData::WithBody(req, headers, body) => (req, headers, Some(body)),
     };
 
-    let req = RequestType::from(req_data);
+    let (method, path) = RequestMethod::parse_request_line(req_data);
     let headers = components::parse_headers(headers_data);
 
     if let Some(body_bytes) = body_data {
@@ -21,8 +21,8 @@ pub fn parse_req(req_data: &RequestData) -> Request {
             body_bytes,
         );
 
-        return Request::new(req, headers, Some(body));
+        return Request::new(method, path, headers, Some(body));
     }
 
-    Request::new(req, headers, None)
+    Request::new(method, path, headers, None)
 }

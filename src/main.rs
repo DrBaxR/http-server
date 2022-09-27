@@ -1,10 +1,12 @@
-use std::{net::{TcpListener, TcpStream}, collections::HashMap, io::Write};
+use std::{net::{TcpListener, TcpStream}, io::Write};
 
-use web_server::http::{self, request::Request, response::Response};
+use http::response::ResponseStatus;
+use web_server::http::{self, request::Request, response::{Response}};
 
 fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("127.0.0.1:2020")?;
-    println!("Listening on port 2020...");
+    const PORT: &str = "2020";
+    let listener = TcpListener::bind(format!("127.0.0.1:{PORT}"))?;
+    println!("[MAIN] Listening on port {PORT}...");
 
     for stream in listener.incoming() {
         handle_connection(stream?);
@@ -17,12 +19,10 @@ fn handle_connection(mut stream: TcpStream) {
     let req_data = http::request::reader::read_req(&stream);
     let req = Request::from(req_data);
 
-    // todo: cleanup
-    let mut headers: HashMap<String, String> = HashMap::new();
-    headers.insert(String::from("Content-Length"), String::from("0"));
-    let mut res = Response::new(http::response::status::ResponseStatus::Ok, headers, None);
-    let ser = res.serialize();
+    println!("[MAIN] Received request: {:?} {}", req.method, req.path);
 
-    println!("{req:?}\n");
-    stream.write_all(&ser).unwrap();
+    let payload = "This is the response".as_bytes();
+    let response_data = Response::build_data(ResponseStatus::Ok, &[("Content-Length", "0")], Some(Vec::from(payload)));
+
+    stream.write_all(&response_data).unwrap();
 }

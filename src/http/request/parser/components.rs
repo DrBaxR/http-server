@@ -2,17 +2,17 @@ use std::{collections::HashMap, fmt::Debug};
 
 use json::JsonValue;
 
-pub enum RequestType {
-    Get(String),
-    Put(String),
-    Delete(String),
-    Patch(String),
-    Post(String),
+pub enum RequestMethod {
+    Get,
+    Put,
+    Delete,
+    Patch,
+    Post,
     Unknown,
 }
 
-impl RequestType {
-    pub fn from(req_data: &String) -> RequestType {
+impl RequestMethod {
+    pub fn parse_request_line(req_data: &String) -> (RequestMethod, String) {
         let split_data: Vec<_> = req_data.split(" ").collect();
         let (method, uri, _version) = (
             split_data.get(0).unwrap().to_string(),
@@ -20,26 +20,28 @@ impl RequestType {
             split_data.get(2).unwrap(),
         );
 
-        match method.as_str() {
-            "GET" => RequestType::Get(uri),
-            "POST" => RequestType::Post(uri),
-            "PUT" => RequestType::Put(uri),
-            "PATCH" => RequestType::Patch(uri),
-            "DELETE" => RequestType::Delete(uri),
-            _ => RequestType::Unknown,
-        }
+        let method = match method.as_str() {
+            "GET" => RequestMethod::Get,
+            "POST" => RequestMethod::Post,
+            "PUT" => RequestMethod::Put,
+            "PATCH" => RequestMethod::Patch,
+            "DELETE" => RequestMethod::Delete,
+            _ => RequestMethod::Unknown,
+        };
+
+        (method, uri)
     }
 }
 
-impl Debug for RequestType {
+impl Debug for RequestMethod {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Get(arg0) => f.debug_tuple("Get").field(arg0).finish(),
-            Self::Put(arg0) => f.debug_tuple("Put").field(arg0).finish(),
-            Self::Delete(arg0) => f.debug_tuple("Delete").field(arg0).finish(),
-            Self::Patch(arg0) => f.debug_tuple("Patch").field(arg0).finish(),
-            Self::Post(arg0) => f.debug_tuple("Post").field(arg0).finish(),
-            Self::Unknown => f.debug_tuple("Unknown").finish(),
+            Self::Get => write!(f, "Get"),
+            Self::Put => write!(f, "Put"),
+            Self::Delete => write!(f, "Delete"),
+            Self::Patch => write!(f, "Patch"),
+            Self::Post => write!(f, "Post"),
+            Self::Unknown => write!(f, "Unknown"),
         }
     }
 }
@@ -71,16 +73,6 @@ impl RequestBody {
         let text = String::from_utf8(data.to_owned()).unwrap();
 
         json::parse(&text).unwrap()
-    }
-}
-
-impl Debug for RequestBody {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::TextPlain(arg0) => f.debug_tuple("TextPlain").field(arg0).finish(),
-            Self::ApplicationJson(arg0) => f.debug_tuple("ApplicationJson").field(arg0).finish(),
-            Self::Unknown(arg0) => f.debug_tuple("Unknown").field(arg0).finish(),
-        }
     }
 }
 
