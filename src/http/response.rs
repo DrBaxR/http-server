@@ -25,7 +25,7 @@ impl Response {
         status: ResponseStatus,
         mut headers: HashMap<String, String>,
         body: Option<Vec<u8>>,
-    ) -> Response {
+    ) -> Self {
         // set the content length in case response has a body
         if let Some(body) = &body {
             headers.insert(String::from("Content-Length"), body.len().to_string());
@@ -38,7 +38,7 @@ impl Response {
         }
     }
 
-    fn serialize(&mut self) -> Vec<u8> {
+    pub fn serialize(&mut self) -> Vec<u8> {
         let headers = self
             .headers
             .iter()
@@ -58,14 +58,12 @@ impl Response {
         res_bytes
     }
 
-    pub fn build_data(status: ResponseStatus, headers: &[(&str, &str)], body: Option<Vec<u8>>) -> Vec<u8> {
+    pub fn build(status: ResponseStatus, headers: &[(&str, &str)], body: Option<Vec<u8>>) -> Self {
         let mut headers_map = HashMap::new();
         for (key, value) in headers {
             headers_map.insert(key.to_string(), value.to_string());
         }
 
-        let mut res = Response::new(status, headers_map, body);
-
-        res.serialize()
+        Response::new(status, headers_map, body)
     }
 }

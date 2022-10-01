@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use json::JsonValue;
 
+#[derive(Eq, PartialEq, Debug)]
 pub enum RequestMethod {
     Get,
     Put,
@@ -30,19 +31,6 @@ impl RequestMethod {
         };
 
         (method, uri)
-    }
-}
-
-impl Debug for RequestMethod {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Get => write!(f, "Get"),
-            Self::Put => write!(f, "Put"),
-            Self::Delete => write!(f, "Delete"),
-            Self::Patch => write!(f, "Patch"),
-            Self::Post => write!(f, "Post"),
-            Self::Unknown => write!(f, "Unknown"),
-        }
     }
 }
 
