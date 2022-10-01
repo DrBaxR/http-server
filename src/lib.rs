@@ -13,20 +13,16 @@ use crate::http::response::ResponseStatus;
 
 pub mod http;
 
-pub struct HttpServer<F>
-where
-    F: Fn(&Request) -> Response,
+pub struct HttpServer
 {
     port: usize,
     stream: Option<TcpStream>,
-    handlers: Vec<Handler<F>>,
+    handlers: Vec<Handler>,
 }
 
-impl<F> HttpServer<F>
-where
-    F: Fn(&Request) -> Response,
+impl HttpServer
 {
-    pub fn new(port: usize, handlers: Vec<Handler<F>>) -> Self {
+    pub fn new(port: usize, handlers: Vec<Handler>) -> Self {
         HttpServer {
             port,
             stream: None,
@@ -45,6 +41,7 @@ where
     }
 
     fn handle_connection(&mut self) {
+        // TODO: refactor this
         let req = if let Some(stream) = &mut self.stream {
             let req_data = http::request::reader::read_req(&stream);
             let req = Request::from(req_data);
@@ -74,25 +71,21 @@ where
         if let Some(handler) = handler {
             handler.handle(req)
         } else {
-            Response::new(ResponseStatus::NotFound, HashMap::new(), None)
+            Response::new(ResponseStatus::NotFound, HashMap::new(), Some("No handler found for method".as_bytes().to_vec()))
         }
     }
 }
 
-pub struct Handler<F>
-where
-    F: Fn(&Request) -> Response,
+pub struct Handler
 {
     method: RequestMethod,
     path: &'static str,
-    handle: F,
+    handle: Box<dyn Fn(&Request) -> Response>,
 }
 
-impl<F> Handler<F>
-where
-    F: Fn(&Request) -> Response,
+impl Handler
 {
-    pub fn new(method: RequestMethod, path: &'static str, handle: F) -> Self {
+    pub fn new(method: RequestMethod, path: &'static str, handle: Box<dyn Fn(&Request) -> Response>) -> Self {
         Handler {
             method,
             path,

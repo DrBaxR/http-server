@@ -51,6 +51,14 @@ impl RequestBody {
         }
     }
 
+    pub fn data(&self) -> Vec<u8> {
+        match self {
+            Self::TextPlain(string) => string.as_bytes().to_vec(),
+            Self::ApplicationJson(json) => json.to_string().as_bytes().to_vec(),
+            Self::Unknown(data) => data.clone()
+        }
+    }
+
     fn parse_text_plain(data: &Vec<u8>) -> String {
         String::from_utf8(data.to_owned()).unwrap()
     }
